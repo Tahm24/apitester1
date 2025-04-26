@@ -13,30 +13,26 @@ vectorizer = joblib.load('tfidf_vectorizer.pkl')
 
 app = FastAPI()
 
-# Allow CORS (so Node.js frontend can talk to it)
+# Allow CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["*"],   # Only one time
     allow_headers=["*"],
-    allow_methods=["*"],
 )
 
 @app.post("/extract-keywords/")
 async def extract_keywords(file: UploadFile = File(...)):
-    # Read file contents
     contents = await file.read()
     
     # Save temporarily
     with open("temp_uploaded.docx", "wb") as f:
         f.write(contents)
 
-    # Use python-docx to read the temp file
     document = Document("temp_uploaded.docx")
     text_content = "\n".join([para.text for para in document.paragraphs])
 
-    # Extract keywords
     stop_words = text.ENGLISH_STOP_WORDS
     words = re.findall(r'\b\w+\b', text_content.lower())
     filtered_words = [word for word in words if word not in stop_words and len(word) > 2]
