@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from docx import Document
 import tensorflow as tf
 import joblib
 import uvicorn
@@ -19,13 +20,23 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_methods=["*"],
 )
 
 @app.post("/extract-keywords/")
 async def extract_keywords(file: UploadFile = File(...)):
-    content = await file.read()
-    text_content = content.decode('utf-8')
+    # Read file contents
+    contents = await file.read()
+    
+    # Save temporarily
+    with open("temp_uploaded.docx", "wb") as f:
+        f.write(contents)
 
+    # Use python-docx to read the temp file
+    document = Document("temp_uploaded.docx")
+    text_content = "\n".join([para.text for para in document.paragraphs])
+
+    # Extract keywords
     stop_words = text.ENGLISH_STOP_WORDS
     words = re.findall(r'\b\w+\b', text_content.lower())
     filtered_words = [word for word in words if word not in stop_words and len(word) > 2]
