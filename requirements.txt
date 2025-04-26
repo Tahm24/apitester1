@@ -4,3 +4,5 @@ tensorflow
 scikit-learn
 joblib
 python-multipart
+python-docx
+
